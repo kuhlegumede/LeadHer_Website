@@ -1,0 +1,36 @@
+# React frontend
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# ASP.NET Core backend
+backend/bin/
+backend/obj/
+backend/*.user
+backend/*.suo
+backend/*.vs
+backend/Properties/launchSettings.json
+
+# SQL Server / Database
+*.mdf
+*.ldf
+*.bak
+database/*.mdf
+database/*.ldf
+database/*.bak
+
+# General / OS files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+
+# IDE / Editor
+.vscode/
+.idea/
+*.sln.docstates
+*.userprefs

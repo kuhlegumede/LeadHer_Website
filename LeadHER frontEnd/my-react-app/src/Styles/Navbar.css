@@ -1,0 +1,61 @@
+.nav-header {
+  background: rgb(15, 11, 41);
+  padding: 1rem 2rem;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-logo span {
+  color: rgb(44, 176, 233);
+}
+
+.nav-list {
+  display:flex;
+  gap: 1.5rem;
+  list-style:none;
+  margin-top:2%;
+  padding: 0;
+}
+
+.nav-link {
+  color:rgb(44, 176, 233);
+  text-decoration: none;
+  border: 2px solid rgb(44, 176, 233);
+  border-radius:50px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background-color:white;
+  box-shadow: 0 4px 8px rgba(44, 176, 233, 0.2);
+}
+
+.nav-link:hover.active {
+  transform: scale(1,2);
+  background-color: rgb(44, 176, 233);
+  color: white;
+}
+
+.nav-link:not(.active){
+  transform: scale(0.9);
+  opacity: 0.8;
+}
+.login {
+  background: rgb(214, 212, 211);
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+}
