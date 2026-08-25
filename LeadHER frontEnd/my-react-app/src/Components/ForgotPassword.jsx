@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Styles/ForgotPassword.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function ForgotPassword() {
     const navigate = useNavigate();
@@ -27,8 +28,8 @@ export default function ForgotPassword() {
         setLoading(true);
 
         try {
-            const res = await fetch(
-                "https://localhost:7033/api/Auth/forgot-password",
+           
+                const res = await fetch(`${API_URL}/api/Auth/forgot-password`,
                 {
                     method: "PUT",
                     headers: {
