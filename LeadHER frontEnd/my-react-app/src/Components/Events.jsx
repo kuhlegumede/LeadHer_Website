@@ -99,7 +99,7 @@ return (
               <div className="event-image">
                 {event.imageUrl ? (
                   <img
-                    src={`https://localhost:7033${event.imageUrl}`}
+                   src={`${API_URL}${event.imageUrl}`}
                     alt={event.title}
                   />
                 ) : (
