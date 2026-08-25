@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Styles/Pages.css";
 import "../Styles/BlogList.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const BlogList = () => {
   const [blogs, setBlogs] = useState([]);
@@ -10,7 +11,7 @@ const BlogList = () => {
 
   const loadBlogs = useCallback(async () => {
     try {
-      const res = await fetch("https://localhost:7033/api/Blog", {
+      const res = await fetch("${API_URL}/api/Blog", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
 
@@ -62,7 +63,7 @@ const BlogList = () => {
               {blog.text?.length > 170 && "..."}
               </p>
               <div className="blog-card-actions">
-                <button onClick={() => navigate(`/blog/${blog.id}`)} className="view-btn">View</button>
+               
               </div>
             </div>
           ))}
