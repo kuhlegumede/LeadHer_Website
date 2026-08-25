@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../Styles/Pages.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -15,7 +16,7 @@ const BlogDetail = () => {
 
   const loadBlog = useCallback(async () => {
     try {
-      const res = await fetch(`https://localhost:7033/api/Blog/${id}`);
+      const res = await fetch(`${API_URL}/api/Blog/${id}`);
       const data = await res.json();
       console.log(data.images);
       setBlog(data);
@@ -34,7 +35,7 @@ const BlogDetail = () => {
 
   const loadComments = useCallback(async () => {
     try {
-      const res = await fetch(`https://localhost:7033/api/Comment/${id}`);
+      const res = await fetch(`${API_URL}/api/Comment/${id}`);
       const data = await res.json();
       setComments(data);
     } catch (error) {
@@ -56,7 +57,7 @@ const BlogDetail = () => {
 
     try {
       const method = liked ? "DELETE" : "POST";
-      const res = await fetch(`https://localhost:7033/api/Like/${id}`, {
+      const res = await fetch(`${API_URL}/api/Like/${id}`, {
         method,
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -85,7 +86,7 @@ const BlogDetail = () => {
     }
 
     try {
-      const res = await fetch("https://localhost:7033/api/Comment", {
+      const res = await fetch("${API_URL}/api/Comment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -158,7 +159,7 @@ const BlogDetail = () => {
             <div className="blog-detail-image">
             {blog.images && (
               <img 
-                src = {`https://localhost:7033/${blog.images}`}
+                src = {`${API_URL}/${blog.images}`}
                 alt = {blog.title}
                 />
             )}
