@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Styles/Pages.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const AddEvent = () => {
   const [form, setForm] = useState({
@@ -27,7 +28,7 @@ const AddEvent = () => {
     if (image) data.append("Image", image);
 
     try {
-      const res = await fetch("https://localhost:7033/api/Events", {
+      const res = await fetch("${API_URL}/api/Events", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`
