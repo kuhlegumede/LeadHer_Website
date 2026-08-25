@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../Styles/Pages.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -17,7 +18,7 @@ const Events = () => {
 
   const loadEvents = async () => {
     try {
-      const res = await fetch("https://localhost:7033/api/Events");
+       const res = await fetch(`${API_URL}/api/Events`);
       if (!res.ok) {
         throw new Error("Failed to load events");
       }
