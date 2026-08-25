@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Styles/Pages.css";
 import "../Styles/Admin.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("blogs");
@@ -27,7 +28,7 @@ const AdminDashboard = () => {
   }, [token, navigate]);
 
   const loadBlogs = useCallback(async () => {
-    const res = await fetch("https://localhost:7033/api/Blog", {
+    const res = await fetch("${API_URL}/api/Blog", {
       headers: { Authorization: `Bearer ${token}` }
     });
     
@@ -54,7 +55,7 @@ const AdminDashboard = () => {
   }, [token]);
 
   const loadUsers = useCallback(async () => {
-    const res = await fetch("https://localhost:7033/api/Admin/users", {
+    const res = await fetch("${API_URL}/api/Admin/users", {
       headers: { Authorization: `Bearer ${token}` }
     });
     
@@ -90,7 +91,7 @@ const AdminDashboard = () => {
     if (!window.confirm("Are you sure you want to delete this posts? This action cannot be undone.")) return;
 
     try {
-      const res = await fetch(`https://localhost:7033/api/Admin/blog/${id}`, {
+      const res = await fetch(`${API_URL}/api/Admin/blog/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -110,7 +111,7 @@ const AdminDashboard = () => {
     if (!window.confirm("Are you sure you want to delete this user? This will delete all their posts and comments.")) return;
 
     try {
-      const res = await fetch(`https://localhost:7033/api/Admin/user/${id}`, {
+      const res = await fetch(`${API_URL}/api/Admin/user/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
