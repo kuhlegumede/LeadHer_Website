@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "../Styles/Journal.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const MyJournals = () => {
-  const API_URL = "https://localhost:7033/api/Journal";
+  const res = await fetch(`${API_URL}/api/Journal`;
   const token = localStorage.getItem("token");
 
   const [journals, setJournals] = useState([]);
