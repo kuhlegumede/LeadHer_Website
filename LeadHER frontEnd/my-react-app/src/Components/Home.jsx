@@ -5,6 +5,7 @@ import "../Styles/Home.css";
 //import leadherBanner from "../Assets/IMG_E1779.JPG";
 import queeny from "../Assets/queeny.JPG";
 import sinovuyo from "../Assets/sinovuyo.JPG";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Home = () => {
   const [blogs, setBlogs] = useState([]);
@@ -20,7 +21,7 @@ const Home = () => {
 
   const loadBlogs = async () => {
     try {
-      const res = await fetch("https://localhost:7033/api/Blog");
+      const res = await fetch(`${API_URL}/api/Blog`);
       const data = await res.json();
       setBlogs(data);
     } catch (error) {
@@ -166,7 +167,7 @@ const Home = () => {
                 <div className="blog-card-image">
                   {blog.imageUrl ? (
                     <img
-                      src={`https://localhost:7033${blog.imageUrl}`}
+                      src={`${API_URL}${blog.imageUrl}`}
                       alt={blog.title}
                     />
                   ) : (
