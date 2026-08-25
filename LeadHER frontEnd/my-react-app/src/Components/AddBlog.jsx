@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../Styles/Pages.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const AddBlog = () => {
   const [title, setTitle] = useState("");
@@ -37,7 +38,7 @@ const AddBlog = () => {
         formData.append("image", image);
       }
 
-      const res = await fetch("https://localhost:7033/api/Blog", {
+      const res = await fetch("${API_URL}/api/Blog", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`
