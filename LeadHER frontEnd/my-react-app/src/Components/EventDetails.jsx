@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../Styles/Pages.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -10,7 +11,7 @@ const EventDetails = () => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
 
-  const API_URL = "https://localhost:7033/api/Events";
+  const res = await fetch(`${API_URL}/api/Events`);
 
   const token = localStorage.getItem("token");
 
@@ -30,7 +31,7 @@ const EventDetails = () => {
     try {
       setLoading(true);
 
-      const res = await fetch(`${API_URL}/${id}`);
+      const res = await fetch(`${API_URL}/api/Events/${id}`);
 
       if (!res.ok) {
         throw new Error("Failed to load event");
@@ -69,7 +70,7 @@ const EventDetails = () => {
     try {
       setDeleting(true);
 
-      const response = await fetch(`${API_URL}/${id}`, {
+      const response = await fetch(`${API_URL}/api/Events/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -168,7 +169,7 @@ const EventDetails = () => {
 
           {event.imageUrl ? (
             <img
-              src={`https://localhost:7033${event.imageUrl}`}
+              src={`${API_URL}${event.imageUrl}`}
               alt={event.title}
               onLoad={() =>
                 console.log("Image loaded")
