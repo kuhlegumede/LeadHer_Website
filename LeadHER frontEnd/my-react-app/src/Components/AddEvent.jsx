@@ -28,7 +28,7 @@ const AddEvent = () => {
     if (image) data.append("Image", image);
 
     try {
-      const res = await fetch("${API_URL}/api/Events", {
+      const res = await fetch(`${API_URL}/api/Events`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`

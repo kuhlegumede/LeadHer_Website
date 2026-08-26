@@ -38,7 +38,7 @@ const AddBlog = () => {
         formData.append("image", image);
       }
 
-      const res = await fetch("${API_URL}/api/Blog", {
+      const res = await fetch(`${API_URL}/api/Blog`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`

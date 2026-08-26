@@ -121,7 +121,7 @@ const Login = () => {
               <label className="form-label">Password</label>
               <input
                 type="password"
-                autocomplete = "current-password"
+                autocomplete="current-password"
                 placeholder="Enter your password"
                 className="form-input"
                 value={password}
