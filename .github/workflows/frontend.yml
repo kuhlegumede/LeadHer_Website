@@ -7,6 +7,7 @@ on:
     paths:
       - "LeadHER frontEnd/my-react-app/**"
       - ".github/workflows/frontend.yml"
+
   workflow_dispatch:
 
 jobs:
@@ -60,9 +61,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_75A544F5F060464EAE8360268E34B84D }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_0C71A5A5414740828D48EC059E2FCA4D }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_E2018098F3104A48990F5D0645EA5695 }}
 
       - name: Deploy React frontend to Azure
         uses: azure/webapps-deploy@v3
