@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "../Styles/Journal.css";
+
 const API_URL = import.meta.env.VITE_API_URL;
+const JOURNAL_URL = `${API_URL}/api/Journal`;
 
 const MyJournals = () => {
-  const res = await fetch(`${API_URL}/api/Journal`;
   const token = localStorage.getItem("token");
 
   const [journals, setJournals] = useState([]);
@@ -15,6 +16,10 @@ const MyJournals = () => {
   const [deletingId, setDeletingId] = useState(null);
 
   const journalsPerPage = 6;
+
+  // =========================================================
+  // LOAD JOURNALS
+  // =========================================================
 
   const loadJournals = async () => {
     if (!token) {
@@ -27,35 +32,62 @@ const MyJournals = () => {
       setLoading(true);
       setError("");
 
-      const response = await fetch(API_URL, {
+      const response = await fetch(JOURNAL_URL, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
 
+      console.log("Journals GET status:", response.status);
+
       if (response.status === 401) {
-        throw new Error("Your session has expired. Please login again.");
+        throw new Error(
+          "Your session has expired. Please login again."
+        );
       }
 
       if (!response.ok) {
-        throw new Error("Unable to load your journals.");
+        const errorText = await response.text();
+
+        console.error(
+          "Load journals backend error:",
+          errorText
+        );
+
+        throw new Error(
+          errorText || "Unable to load your journals."
+        );
       }
 
       const data = await response.json();
 
+      console.log("Journals loaded:", data);
+
       setJournals(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error(err);
-      setError(err.message);
+      console.error("Load journals error:", err);
+
+      setError(
+        err.message || "Unable to load your journals."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  // =========================================================
+  // INITIAL LOAD
+  // =========================================================
+
   useEffect(() => {
     loadJournals();
   }, []);
+
+  // =========================================================
+  // FILTER JOURNALS
+  // =========================================================
 
   const filteredJournals = useMemo(() => {
     const searchTerm = search.trim().toLowerCase();
@@ -89,6 +121,10 @@ const MyJournals = () => {
     });
   }, [journals, search]);
 
+  // =========================================================
+  // PAGINATION
+  // =========================================================
+
   const totalPages = Math.ceil(
     filteredJournals.length / journalsPerPage
   );
@@ -103,10 +139,18 @@ const MyJournals = () => {
     );
   }, [filteredJournals, currentPage]);
 
+  // =========================================================
+  // SEARCH
+  // =========================================================
+
   const handleSearch = (e) => {
     setSearch(e.target.value);
     setCurrentPage(1);
   };
+
+  // =========================================================
+  // DELETE JOURNAL
+  // =========================================================
 
   const deleteJournal = async (id) => {
     const confirmed = window.confirm(
@@ -117,17 +161,29 @@ const MyJournals = () => {
       return;
     }
 
+    if (!token) {
+      alert(
+        "Your session has expired. Please login again."
+      );
+      return;
+    }
+
     try {
       setDeletingId(id);
 
       const response = await fetch(
-        `${API_URL}/${id}`,
+        `${JOURNAL_URL}/${id}`,
         {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
+      );
+
+      console.log(
+        "Delete journal status:",
+        response.status
       );
 
       if (response.status === 401) {
@@ -150,15 +206,14 @@ const MyJournals = () => {
         );
       }
 
-      // Remove the deleted journal immediately
+      // Remove deleted journal immediately
       setJournals((previous) =>
         previous.filter(
           (journal) => journal.id !== id
         )
       );
 
-      // If the current page becomes empty,
-      // move back one page.
+      // Adjust pagination if necessary
       setCurrentPage((page) => {
         const remaining =
           filteredJournals.length - 1;
@@ -172,13 +227,25 @@ const MyJournals = () => {
 
         return Math.min(page, newTotalPages);
       });
+
     } catch (err) {
-      console.error(err);
-      alert(err.message);
+      console.error(
+        "Delete journal error:",
+        err
+      );
+
+      alert(
+        err.message ||
+          "Something went wrong while deleting the journal."
+      );
     } finally {
       setDeletingId(null);
     }
   };
+
+  // =========================================================
+  // FORMAT DATE
+  // =========================================================
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString(
@@ -191,6 +258,10 @@ const MyJournals = () => {
     );
   };
 
+  // =========================================================
+  // FORMAT TIME
+  // =========================================================
+
   const formatTime = (date) => {
     return new Date(date).toLocaleTimeString(
       "en-ZA",
@@ -201,28 +272,50 @@ const MyJournals = () => {
     );
   };
 
+  // =========================================================
+  // LOADING
+  // =========================================================
+
   if (loading) {
     return (
       <section className="page">
         <div className="journal-loading">
+
           <div className="journal-spinner"></div>
-          <p>Loading your journals...</p>
+
+          <p>
+            Loading your journals...
+          </p>
+
         </div>
       </section>
     );
   }
 
+  // =========================================================
+  // ERROR
+  // =========================================================
+
   if (error) {
     return (
       <section className="page">
+
         <div className="journal-error">
-          <div className="error-icon">!</div>
 
-          <h2>Unable to Load Journals</h2>
+          <div className="error-icon">
+            !
+          </div>
 
-          <p>{error}</p>
+          <h2>
+            Unable to Load Journals
+          </h2>
+
+          <p>
+            {error}
+          </p>
 
           <div className="error-actions">
+
             <button
               className="journal-primary-button"
               onClick={loadJournals}
@@ -236,28 +329,41 @@ const MyJournals = () => {
             >
               Back to Journal
             </Link>
+
           </div>
+
         </div>
+
       </section>
     );
   }
 
+  // =========================================================
+  // PAGE
+  // =========================================================
+
   return (
     <section className="page">
+
       <div className="my-journals-page">
 
         {/* HEADER */}
+
         <div className="journals-header">
 
           <div className="journals-heading">
 
             <div>
-              <h1>My Journals</h1>
+
+              <h1>
+                My Journals
+              </h1>
 
               <p>
                 Your personal space for reflections,
                 gratitude, prayers and thoughts.
               </p>
+
             </div>
 
           </div>
@@ -272,6 +378,7 @@ const MyJournals = () => {
         </div>
 
         {/* SEARCH + COUNT */}
+
         <div className="journals-toolbar">
 
           <div className="search-wrapper">
@@ -304,15 +411,19 @@ const MyJournals = () => {
           </div>
 
           <div className="journal-count">
+
             {filteredJournals.length}{" "}
+
             {filteredJournals.length === 1
               ? "Journal"
               : "Journals"}
+
           </div>
 
         </div>
 
         {/* EMPTY STATE */}
+
         {filteredJournals.length === 0 ? (
 
           <div className="empty-journals">
@@ -323,10 +434,13 @@ const MyJournals = () => {
 
             {search ? (
               <>
-                <h2>No Journals Found</h2>
+                <h2>
+                  No Journals Found
+                </h2>
 
                 <p>
-                  No journal entries match "{search}".
+                  No journal entries match
+                  "{search}".
                 </p>
 
                 <button
@@ -341,7 +455,9 @@ const MyJournals = () => {
               </>
             ) : (
               <>
-                <h2>Your Journal is Empty</h2>
+                <h2>
+                  Your Journal is Empty
+                </h2>
 
                 <p>
                   Start documenting your thoughts,
@@ -362,115 +478,162 @@ const MyJournals = () => {
         ) : (
 
           <>
+
             {/* JOURNAL GRID */}
+
             <div className="journals-grid">
 
-              {currentJournals.map((journal) => (
+              {currentJournals.map(
+                (journal) => (
 
-                <article
-                  className="journal-history-card"
-                  key={journal.id}
-                >
+                  <article
+                    className="journal-history-card"
+                    key={journal.id}
+                  >
 
-                  {/* CARD HEADER */}
-                  <div className="journal-card-top">
+                    {/* CARD HEADER */}
 
-                    <div className="journal-card-date">
+                    <div className="journal-card-top">
 
-                      <span className="date-icon">
-                        📅
-                      </span>
+                      <div className="journal-card-date">
 
-                      <div>
-                        <span className="date-text">
-                          {formatDate(
-                            journal.createdAt
-                          )}
+                        <span className="date-icon">
+                          📅
                         </span>
 
-                        <span className="time-text">
-                          {formatTime(
-                            journal.createdAt
-                          )}
-                        </span>
+                        <div>
+
+                          <span className="date-text">
+                            {formatDate(
+                              journal.createdAt
+                            )}
+                          </span>
+
+                          <span className="time-text">
+                            {formatTime(
+                              journal.createdAt
+                            )}
+                          </span>
+
+                        </div>
+
                       </div>
 
+                      {/* DELETE */}
+
+                      <button
+                        className="delete-journal-button"
+                        onClick={() =>
+                          deleteJournal(
+                            journal.id
+                          )
+                        }
+                        disabled={
+                          deletingId ===
+                          journal.id
+                        }
+                        title="Delete journal"
+                        aria-label="Delete journal entry"
+                      >
+
+                        {deletingId ===
+                        journal.id ? (
+                          <>
+                            <span className="delete-spinner"></span>
+                            Deleting...
+                          </>
+                        ) : (
+                          <>
+                            <span className="delete-icon">
+                              🗑️
+                            </span>
+                            Delete
+                          </>
+                        )}
+
+                      </button>
+
                     </div>
-                  <button
-                   className="delete-journal-button"
-                     onClick={() => deleteJournal(journal.id)}
-                     disabled={deletingId === journal.id}
-                     title="Delete journal"
-                     aria-label="Delete journal entry">
-                     {deletingId === journal.id ? (
-                 <>
-                     <span className="delete-spinner"></span>
-                      Deleting...
-                 </>
-                     ) : (
-                  <>
-                    <span className="delete-icon">🗑️</span>
-                     Delete
-                 </>
-                     )}
-                </button>
-                  </div>
-                  {/* TITLE */}
-                  <h2 className="journal-card-title">
-                    {journal.title}
-                  </h2>
-                  {/* GRATITUDE */}
-                  {journal.gratitude && (
+
+                    {/* TITLE */}
+
+                    <h2 className="journal-card-title">
+                      {journal.title}
+                    </h2>
+
+                    {/* GRATITUDE */}
+
+                    {journal.gratitude && (
+                      <div className="journal-preview-section">
+
+                        <h4>
+                          🌼 Gratitude
+                        </h4>
+
+                        <p>
+                          {journal.gratitude}
+                        </p>
+
+                      </div>
+                    )}
+
+                    {/* SCRIPTURE */}
+
+                    {journal.scripturePrayer && (
+                      <div className="journal-preview-section">
+
+                        <h4>
+                          📖 Scripture / Prayer
+                        </h4>
+
+                        <p>
+                          {journal.scripturePrayer}
+                        </p>
+
+                      </div>
+                    )}
+
+                    {/* REFLECTION */}
+
                     <div className="journal-preview-section">
-                      <h4>🌼 Gratitude</h4>
+
+                      <h4>
+                        💭 Thoughts & Reflection
+                      </h4>
 
                       <p>
-                        {journal.gratitude}
+                        {journal.content}
                       </p>
+
                     </div>
-                  )}
 
-                  {/* SCRIPTURE */}
-                  {journal.scripturePrayer && (
-                    <div className="journal-preview-section">
-                      <h4>📖 Scripture / Prayer</h4>
+                    {/* BRAIN DUMP */}
 
-                      <p>
-                        {journal.scripturePrayer}
-                      </p>
-                    </div>
-                  )}
+                    {journal.brainDump && (
+                      <div className="journal-preview-section">
 
-                  {/* REFLECTION */}
-                  <div className="journal-preview-section">
-                    <h4>
-                      💭 Thoughts & Reflection
-                    </h4>
+                        <h4>
+                          🧠 Brain Dump
+                        </h4>
 
-                    <p>
-                      {journal.content}
-                    </p>
-                  </div>
+                        <p>
+                          {journal.brainDump}
+                        </p>
 
-                  {/* BRAIN DUMP */}
-                  {journal.brainDump && (
-                    <div className="journal-preview-section">
-                      <h4>🧠 Brain Dump</h4>
+                      </div>
+                    )}
 
-                      <p>
-                        {journal.brainDump}
-                      </p>
-                    </div>
-                  )}
+                  </article>
 
-                </article>
-
-              ))}
+                )
+              )}
 
             </div>
 
             {/* PAGINATION */}
+
             {totalPages > 1 && (
+
               <div className="journal-pagination">
 
                 <button
@@ -488,8 +651,11 @@ const MyJournals = () => {
                 <div className="pagination-numbers">
 
                   {Array.from(
-                    { length: totalPages },
+                    {
+                      length: totalPages,
+                    },
                     (_, index) => {
+
                       const pageNumber =
                         index + 1;
 
@@ -531,12 +697,14 @@ const MyJournals = () => {
                 </button>
 
               </div>
+
             )}
 
           </>
         )}
 
       </div>
+
     </section>
   );
 };

@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../Styles/Pages.css";
 import "../Styles/Journal.css";
+
 const API_URL = import.meta.env.VITE_API_URL;
+const JOURNAL_URL = `${API_URL}/api/Journal`;
 
 const StudentJournal = () => {
-  const res = await fetch(`${API_URL}/api/Journal`);
-
   const token = localStorage.getItem("token");
 
   const [title, setTitle] = useState("");
@@ -26,13 +26,17 @@ const StudentJournal = () => {
   const loadEntries = async () => {
     try {
       setLoading(true);
+      setError("");
 
-      const response = await fetch(API_URL, {
+      const response = await fetch(JOURNAL_URL, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
+
+      console.log("Journal GET status:", response.status);
 
       if (response.status === 401) {
         throw new Error(
@@ -41,15 +45,26 @@ const StudentJournal = () => {
       }
 
       if (!response.ok) {
+        const text = await response.text();
+
+        console.error("Journal GET error:", text);
+
         throw new Error(
-          "Unable to connect to the journal service."
+          text || "Unable to connect to the journal service."
         );
       }
+
+      const data = await response.json();
+
+      console.log("Journal data:", data);
 
       setError("");
     } catch (err) {
       console.error("Load journal error:", err);
-      setError(err.message);
+
+      setError(
+        err.message || "Unable to load your journal."
+      );
     } finally {
       setLoading(false);
     }
@@ -105,7 +120,6 @@ const StudentJournal = () => {
 
     try {
       setSaving(true);
-
       setError("");
 
       const journalData = {
@@ -118,7 +132,7 @@ const StudentJournal = () => {
 
       console.log("Sending journal:", journalData);
 
-      const response = await fetch(API_URL, {
+      const response = await fetch(JOURNAL_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -127,7 +141,7 @@ const StudentJournal = () => {
         body: JSON.stringify(journalData),
       });
 
-      console.log("Response status:", response.status);
+      console.log("Journal POST status:", response.status);
 
       if (response.status === 401) {
         throw new Error(
@@ -161,7 +175,7 @@ const StudentJournal = () => {
 
       alert(
         err.message ||
-        "Something went wrong while saving your journal."
+          "Something went wrong while saving your journal."
       );
     } finally {
       setSaving(false);
@@ -233,7 +247,9 @@ const StudentJournal = () => {
         <div className="journals-header">
 
           <div className="journals-heading">
+
             <div>
+
               <h1>
                 Student Journal
               </h1>
@@ -244,6 +260,7 @@ const StudentJournal = () => {
                 scripture or prayer and freely
                 express your thoughts.
               </p>
+
             </div>
 
           </div>
@@ -371,8 +388,6 @@ const StudentJournal = () => {
             {/* ACTIONS */}
 
             <div className="journal-actions">
-
-              {/* THIS BUTTON IS NOW INSIDE THE FORM */}
 
               <button
                 type="submit"

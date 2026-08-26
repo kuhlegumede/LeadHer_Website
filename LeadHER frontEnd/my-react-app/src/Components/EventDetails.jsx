@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../Styles/Pages.css";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 const EventDetails = () => {
@@ -11,11 +12,8 @@ const EventDetails = () => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
 
-  const res = await fetch(`${API_URL}/api/Events`);
-
   const token = localStorage.getItem("token");
 
-  // Get logged-in user information
   // Check whether current user is an admin
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
@@ -23,31 +21,40 @@ const EventDetails = () => {
   // LOAD EVENT
   // =========================================================
 
-  useEffect(() => {
-    loadEvent();
-  }, [id]);
-
   const loadEvent = async () => {
     try {
       setLoading(true);
 
-      const res = await fetch(`${API_URL}/api/Events/${id}`);
+      const response = await fetch(
+        `${API_URL}/api/Events/${id}`
+      );
 
-      if (!res.ok) {
+      if (!response.ok) {
         throw new Error("Failed to load event");
       }
 
-      const data = await res.json();
+      const data = await response.json();
 
       console.log("Event loaded:", data);
 
       setEvent(data);
     } catch (error) {
       console.error("Error loading event:", error);
+      setEvent(null);
     } finally {
       setLoading(false);
     }
   };
+
+  // =========================================================
+  // INITIAL LOAD
+  // =========================================================
+
+  useEffect(() => {
+    if (id) {
+      loadEvent();
+    }
+  }, [id]);
 
   // =========================================================
   // DELETE EVENT
@@ -56,6 +63,10 @@ const EventDetails = () => {
   const handleDelete = async () => {
     if (!isAdmin) {
       alert("Only administrators can delete events.");
+      return;
+    }
+
+    if (!event) {
       return;
     }
 
@@ -70,21 +81,30 @@ const EventDetails = () => {
     try {
       setDeleting(true);
 
-      const response = await fetch(`${API_URL}/api/Events/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_URL}/api/Events/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.status === 401) {
-        alert("Your session has expired. Please login again.");
+        alert(
+          "Your session has expired. Please login again."
+        );
+
         navigate("/login");
         return;
       }
 
       if (response.status === 403) {
-        alert("Only administrators can delete events.");
+        alert(
+          "Only administrators can delete events."
+        );
+
         return;
       }
 
@@ -106,18 +126,23 @@ const EventDetails = () => {
 
       alert(
         error.message ||
-        "Something went wrong while deleting the event."
+          "Something went wrong while deleting the event."
       );
     } finally {
       setDeleting(false);
     }
   };
 
+  // =========================================================
+  // LOADING
+  // =========================================================
+
   if (loading) {
     return (
       <section className="page">
         <div className="event-loading">
           <div className="event-spinner"></div>
+
           <p>Loading event...</p>
         </div>
       </section>
@@ -132,6 +157,7 @@ const EventDetails = () => {
     return (
       <section className="page">
         <div className="event-not-found">
+
           <div className="event-not-found-icon">
             📅
           </div>
@@ -144,10 +170,15 @@ const EventDetails = () => {
           >
             ← Back to Events
           </button>
+
         </div>
       </section>
     );
   }
+
+  // =========================================================
+  // PAGE
+  // =========================================================
 
   return (
     <section className="page">
@@ -212,6 +243,8 @@ const EventDetails = () => {
 
           <div className="event-meta-grid">
 
+            {/* TIME */}
+
             <div className="meta-card">
 
               <div className="meta-icon">
@@ -232,6 +265,8 @@ const EventDetails = () => {
               </div>
 
             </div>
+
+            {/* VENUE */}
 
             <div className="meta-card">
 
@@ -265,16 +300,20 @@ const EventDetails = () => {
             <div className="event-admin-actions">
 
               <div className="admin-action-heading">
+
                 <span>⚙️</span>
 
                 <div>
-                  <h3>Administrator Actions</h3>
+                  <h3>
+                    Administrator Actions
+                  </h3>
 
                   <p>
                     Only administrators can manage
                     this event.
                   </p>
                 </div>
+
               </div>
 
               <button
@@ -303,6 +342,7 @@ const EventDetails = () => {
           <div className="event-footer">
 
             Posted on{" "}
+
             {new Date(
               event.createdAt
             ).toLocaleDateString("en-ZA")}
