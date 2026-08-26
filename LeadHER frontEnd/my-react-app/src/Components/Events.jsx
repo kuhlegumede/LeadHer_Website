@@ -20,7 +20,9 @@ const Events = () => {
     try {
        const res = await fetch(`${API_URL}/api/Events`);
       if (!res.ok) {
-        throw new Error("Failed to load events");
+        const errorText = await res.text();
+        console.error("Events API error:", res.status, errorText);
+        throw new Error(`Failed to load events(${res.status})`);
       }
       const data = await res.json();
       data.sort((a,b) => new Date(a.eventDate) - new Date(b.eventDate));
