@@ -12,14 +12,23 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-});
+// ============================================================
+// CONTROLLERS
+// ============================================================
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler =
+            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 
-// Enhanced Swagger configuration with JWT support
+// ============================================================
+// SWAGGER
+// ============================================================
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -34,12 +43,13 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // Add JWT Authentication to Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n " +
-                      "Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\n" +
-                      "Example: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"",
+        Description =
+            "JWT Authorization header using the Bearer scheme.\r\n\r\n" +
+            "Enter 'Bearer' [space] and then your token.\r\n\r\n" +
+            "Example: \"Bearer eyJhbGciOiJIUzI1NiIs...\"",
+
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
@@ -60,73 +70,147 @@ builder.Services.AddSwaggerGen(options =>
             Array.Empty<string>()
         }
     });
-
 });
 
-// Database
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// ============================================================
+// DATABASE
+// ============================================================
 
-// Repositories
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+        "DefaultConnection is missing."
+    );
+}
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        connectionString,
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null
+            );
+        }
+    ));
+
+// ============================================================
+// REPOSITORIES
+// ============================================================
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBlogRepository, BlogRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IJournalRepository, JournalRepository>();
 
-// Services
+// ============================================================
+// SERVICES
+// ============================================================
+
 builder.Services.AddScoped<IAuthService, AuthService>();
-// JWT Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+
+// ============================================================
+// JWT AUTHENTICATION
+// ============================================================
+
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException(
+        "Jwt:Key is missing."
+    );
+}
+
+builder.Services.AddAuthentication(
+    JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-            ClockSkew = TimeSpan.Zero
-        };
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+
+                ValidIssuer = jwtIssuer,
+                ValidAudience = jwtAudience,
+
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtKey)
+                    ),
+
+                ClockSkew = TimeSpan.Zero
+            };
     });
 
 builder.Services.AddAuthorization();
 
+// ============================================================
 // CORS
+// ============================================================
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "https://leadherwebsite-apeecbd8g0gygnbr.southafricanorth-01.azurewebsites.net"
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
 });
 
+// ============================================================
+// BUILD APP
+// ============================================================
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// ============================================================
+// SWAGGER
+// ============================================================
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
+
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Blog App API V1");
-        options.DocumentTitle = "Blog App API Documentation";
+        options.SwaggerEndpoint(
+            "/swagger/v1/swagger.json",
+            "Blog App API V1"
+        );
+
+        options.DocumentTitle =
+            "Blog App API Documentation";
     });
 }
 
+// ============================================================
+// MIDDLEWARE
+// ============================================================
+
 app.UseHttpsRedirection();
 
-// Serve static files 
 app.UseStaticFiles();
 
 app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
