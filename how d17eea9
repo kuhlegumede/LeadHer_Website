@@ -1,0 +1,58 @@
+[33mcommit d23f0dcb52578c864b3e309c531f162225d9d732[m
+Author: Kuhle Gumede <112685568+kuhlegumede@users.noreply.github.com>
+Date:   Wed Aug 26 01:21:44 2026 +0200
+
+    Refactor Azure workflow to include project path
+    
+    Updated the workflow to include PROJECT_PATH environment variable for the .NET project path and adjusted build and publish commands accordingly.
+
+[1mdiff --git a/.github/workflows/main_leadher-api.yml b/.github/workflows/main_leadher-api.yml[m
+[1mindex 34e83bf..fa173db 100644[m
+[1m--- a/.github/workflows/main_leadher-api.yml[m
+[1m+++ b/.github/workflows/main_leadher-api.yml[m
+[36m@@ -3,6 +3,9 @@[m
+ [m
+ name: Build and deploy ASP.Net Core app to Azure Web App - leadher-api[m
+ [m
+[32m+[m[32menv:[m[41m[m
+[32m+[m[32m  PROJECT_PATH: './LeadHer backEnd/BlogApp_BackEnd.csproj'[m[41m[m
+[32m+[m[41m[m
+ on:[m
+   push:[m
+     branches:[m
+[36m@@ -24,10 +27,10 @@[m [mjobs:[m
+           dotnet-version: '8.x'[m
+ [m
+       - name: Build with dotnet[m
+[31m-        run: dotnet build --configuration Release[m
+[32m+[m[32m        run: dotnet build "${{ env.PROJECT_PATH }}" --configuration Release[m[41m[m
+ [m
+       - name: dotnet publish[m
+[31m-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"[m
+[32m+[m[32m        run: dotnet publish "${{ env.PROJECT_PATH }}" -c Release -o "${{ env.DOTNET_ROOT }}/myapp"[m[41m[m
+ [m
+       - name: Upload artifact for deployment job[m
+         uses: actions/upload-artifact@v4[m
+[36m@@ -38,13 +41,13 @@[m [mjobs:[m
+   deploy:[m
+     runs-on: windows-latest[m
+     needs: build[m
+[31m-    [m
+[32m+[m[41m[m
+     steps:[m
+       - name: Download artifact from build job[m
+         uses: actions/download-artifact@v4[m
+         with:[m
+           name: .net-app[m
+[31m-      [m
+[32m+[m[41m[m
+       - name: Deploy to Azure Web App[m
+         id: deploy-to-webapp[m
+         uses: azure/webapps-deploy@v3[m
+[36m@@ -52,4 +55,4 @@[m [mjobs:[m
+           app-name: 'leadher-api'[m
+           slot-name: 'Production'[m
+           package: .[m
+[31m-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_7CDF1500D4D24A189140CF6A2008A528 }}[m
+\ No newline at end of file[m
+[32m+[m[32m          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_7CDF1500D4D24A189140CF6A2008A528 }}[m[41m[m

@@ -86,7 +86,7 @@ const BlogDetail = () => {
     }
 
     try {
-      const res = await fetch("${API_URL}/api/Comment", {
+      const res = await fetch(`${API_URL}/api/Comment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

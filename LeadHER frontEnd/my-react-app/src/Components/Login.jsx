@@ -45,7 +45,7 @@ const Login = () => {
     setSuccessMessage("");
 
     try {
-      const res = await fetch("${API_URL}/api/Auth/login", {
+      const res = await fetch(`${API_URL}/api/Auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -112,6 +112,7 @@ const Login = () => {
                 className="form-input"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                autoComplete="email"
                 required
               />
             </div>
@@ -120,6 +121,7 @@ const Login = () => {
               <label className="form-label">Password</label>
               <input
                 type="password"
+                autocomplete = "current-password"
                 placeholder="Enter your password"
                 className="form-input"
                 value={password}

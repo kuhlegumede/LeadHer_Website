@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "wPm/y2za6Fs=",
+  "dgSpecHash": "fj42PxUiEYA=",
   "success": true,
-  "projectFilePath": "C:\\Users\\knhla\\OneDrive\\Documentos\\LeadHer\\LeadHer backEnd\\BlogApp_BackEnd.csproj",
+  "projectFilePath": "C:\\Users\\knhla\\OneDrive\\Documentos\\LeadHer_New\\LeadHer_Website\\LeadHer backEnd\\BlogApp_BackEnd.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\knhla\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\knhla\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

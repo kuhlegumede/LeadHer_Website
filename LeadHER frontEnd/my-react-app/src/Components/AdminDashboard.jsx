@@ -28,7 +28,7 @@ const AdminDashboard = () => {
   }, [token, navigate]);
 
   const loadBlogs = useCallback(async () => {
-    const res = await fetch("${API_URL}/api/Blog", {
+    const res = await fetch(`${API_URL}/api/Blog`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     
@@ -55,7 +55,7 @@ const AdminDashboard = () => {
   }, [token]);
 
   const loadUsers = useCallback(async () => {
-    const res = await fetch("${API_URL}/api/Admin/users", {
+    const res = await fetch(`${API_URL}/api/Admin/users`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     

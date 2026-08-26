@@ -11,7 +11,7 @@ const BlogList = () => {
 
   const loadBlogs = useCallback(async () => {
     try {
-      const res = await fetch("${API_URL}/api/Blog", {
+      const res = await fetch(`${API_URL}/api/Blog`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
 
